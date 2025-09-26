@@ -1,42 +1,64 @@
 services:
-  db:
-    image: mariadb:latest
-    restart: always
-    # Important en test local mais pas en prod
+  mariadb:
+    build: services/mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    env_file: .env
+    # Centralisation de toutes les variables d'environnement
     environment:
-      MYSQL_ROOT_PASSWORD: roottest
-      MYSQL_USER: test
-      MYSQL_PASSWORD: testpass
-      MYSQL_DATABASE: wordpress
-    ports:
-        - '3306:3306'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-        - ${PWD}/mariadb/:/var/lib/mysql/
-  wp:
-    image: wordpress:latest
+      - mariadb-data:/var/lib/mysql
+      - ./services/mariadb/custom.cnf:/etc/mysql/conf.d/custom.cnf
+      # bind custom.cnf avec celui du conteneur
+    networks:
+      - backend
+
+  wordpress:
+    build: services/wordpress
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
     volumes:
-      - wp_data:/var/www/html
-    ports:
-      - 80:80
-    restart: always
-    environment:
-      - WORDPRESS_DB_HOST=db
-      - WORDPRESS_DB_USER=test
-      - WORDPRESS_DB_PASSWORD=testpass
-      - WORDPRESS_DB_NAME=wordpress
-    # Important : db = nom du service de BDD inscris plus haut 
-    # Les id WORDPRESS_ doivent être les même que les id MYSQL_
-  phpmyadmin:
-    image: phpmyadmin
+      - wordpress-data:/var/www/html
+    networks:
+      - backend
     depends_on:
-      - db
-      - wp
+      - mariadb
+
+  nginx:
+    build: services/nginx
+    container_name: nginx
+    restart: unless-stopped
     ports:
-      - 81:80
+      - "80:80"
+    volumes:
+      - wordpress-data:/var/www/html
+      - ./services/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - backend
+    depends_on:
+      - wordpress
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
     environment:
-      PMA_HOST: db
+      PMA_HOST: mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - backend
 
 volumes:
-  wp_data:
+  mariadb-data:
+  wordpress-data:
 
-      
+networks:
+  backend:
