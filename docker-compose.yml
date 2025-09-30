@@ -32,7 +32,10 @@ services:
       restart: unless-stopped
       env_file: .env
       volumes:
-        - wordpress-data:/var/www/html
+      - wordpress-data:/var/www/html
+      - ./services/wordpress/backup:/backup
+      - /home/nico/.ssh/id_ed25519:/root/.ssh/id_rsa:ro
+
       expose:
       - 9000
       networks:

@@ -55,6 +55,27 @@ fi
 chown -R www-data:www-data "$WP_PATH"
 
 ####################################################################
+# 
+####################################################################
+
+# Copier la clé vers un fichier temporaire uniquement si elle n'existe pas déjà
+if [ ! -f /tmp/id_rsa ]; then
+  cp /root/.ssh/id_rsa /tmp/id_rsa
+  chmod 600 /tmp/id_rsa
+fi
+
+# Ajouter GitHub à known_hosts (si absent)
+mkdir -p /root/.ssh
+if ! grep -q github.com /root/.ssh/known_hosts 2>/dev/null; then
+  ssh-keyscan github.com >> /root/.ssh/known_hosts
+fi
+chmod 644 /root/.ssh/known_hosts
+
+# Utiliser la clé temporaire
+export GIT_SSH_COMMAND='ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no'
+
+
+####################################################################
 # LANCEMENT DU MOTEUR PHP php-fpm en vérifiant sa version
 ####################################################################
 echo "✅ WordPress OK"
