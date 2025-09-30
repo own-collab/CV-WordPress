@@ -7,10 +7,10 @@
 /* ----------------
  * Connexion à la base de données
  * ---------------- */
-define( 'DB_NAME',     'nom_de_la_base' );
-define( 'DB_USER',     'utilisateur' );
-define( 'DB_PASSWORD', 'mot_de_passe' );
-define( 'DB_HOST',     'localhost' );
+define( 'DB_NAME',     getenv('MYSQL_DATABASE') );
+define( 'DB_USER',     getenv('MYSQL_USER'));
+define( 'DB_PASSWORD', getenv('MYSQL_PASSWORD'));
+define( 'DB_HOST',     getenv('MYSQL_HOST') .':3306' );
 define( 'DB_CHARSET',  'utf8' );
 define( 'DB_COLLATE',  '' );
 
@@ -52,19 +52,19 @@ define( 'WP_DEBUG_DISPLAY', false );
 /* ----------------
  * Sécurité de base
  * ---------------- */
-define( 'DISALLOW_FILE_EDIT', true ); // Empêche l'édition de fichiers dans l'admin
-define( 'FORCE_SSL_ADMIN',    true ); // Force le https : nécessite un certificat SSL valide
+// define( 'DISALLOW_FILE_EDIT', true ); // Empêche l'édition de fichiers dans l'admin
+// define( 'FORCE_SSL_ADMIN',    true ); // Force le https : nécessite un certificat SSL valide
 
 /* ----------------
  * Environnement (à utiliser selon vos pratiques)
  * ---------------- */
-define( 'WP_ENVIRONMENT_TYPE', 'production' );
+// define( 'WP_ENVIRONMENT_TYPE', 'production' );
 
 /* ----------------
  * URL du site (à désactiver en cas de migration ou dans un env. évolutif)
  * ---------------- */
-define( 'WP_HOME',    'https://exemple.com' );
-define( 'WP_SITEURL', 'https://exemple.com' );
+// define( 'WP_HOME',    'https://exemple.com' );
+// define( 'WP_SITEURL', 'https://exemple.com' );
 
 /* ----------------
  * Initialisation de WordPress

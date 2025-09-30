@@ -1,34 +1,4 @@
 services:
-  mariadb:
-    build: services/mariadb
-    container_name: mariadb
-    restart: unless-stopped
-    env_file: .env
-    # Centralisation de toutes les variables d'environnement
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mariadb-data:/var/lib/mysql
-      - ./services/mariadb/custom.cnf:/etc/mysql/conf.d/custom.cnf
-      # bind custom.cnf avec celui du conteneur
-    networks:
-      - backend
-
-  wordpress:
-    build: services/wordpress
-    container_name: wordpress
-    restart: unless-stopped
-    env_file: .env
-    volumes:
-      - wordpress-data:/var/www/html
-    networks:
-      - backend
-    depends_on:
-      - mariadb
-
   nginx:
     build: services/nginx
     container_name: nginx
@@ -42,15 +12,40 @@ services:
       - backend
     depends_on:
       - wordpress
-
+  mariadb:
+    build: services/mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    env_file: .env
+    # Centralisation de toutes les variables d'environnement
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      # - ./services/mariadb/custom.cnf:/etc/mysql/conf.d/custom.cnf
+      # bind custom.cnf avec celui du conteneur
+    expose:
+      - 3306
+    networks:
+      - backend
+  wordpress:
+      build: services/wordpress
+      container_name: wordpress
+      restart: unless-stopped
+      env_file: .env
+      volumes:
+        - wordpress-data:/var/www/html
+      expose:
+      - 9000
+      networks:
+        - backend
+      depends_on:
+        - mariadb
   phpmyadmin:
-    image: phpmyadmin:latest
+    build: services/phpmyadmin
     container_name: phpmyadmin
     restart: unless-stopped
     ports:
       - "8080:80"
-    environment:
-      PMA_HOST: mariadb
+    env_file: .env
     depends_on:
       - mariadb
     networks:
@@ -62,3 +57,4 @@ volumes:
 
 networks:
   backend:
+

@@ -1,4 +1,0 @@
-FROM mariadb:11.1
-
-# Ajout de la configuration personnalisée
-COPY custom.cnf /etc/mysql/conf.d/custom.cnf
