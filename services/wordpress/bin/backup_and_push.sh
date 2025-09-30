@@ -5,9 +5,9 @@ set -euo pipefail
 # ========================
 # Paramètres
 # ========================
-BACKUP_BASE="/backup"
+BACKUP_BASE="services/wordpress/backup"
 DATE_TAG=$(date +%Y%m%d.%H%M)
-BACKUP_DIR="$BACKUP_BASE/$DATE_TAG"
+BACKUP_DIR="$BACKUP_BASE/backup-$DATE_TAG"
 
 # Infos DB récupérées des variables d'environnement
 DB_HOST="${MYSQL_HOST}"
@@ -29,23 +29,32 @@ mysqldump -h"$DB_HOST" -u"$DB_USER" -p"${DB_PASS}" "$DB_NAME" > "$BACKUP_DIR/db.
 echo "📥 Sauvegarde fichiers..."
 cp -a /var/www/html/ "$BACKUP_DIR/files/"
 
+
 # ========================
 # Git commit & push
 # ========================
-cd "$BACKUP_BASE"
 
-# Initialisation repo si nécessaire
-if [ ! -d .git ]; then
-  git init
-  git remote add origin "$GIT_REPO"
-fi
+# ========================
+# Git commit & push
+# ========================
 
+# Se placer à la racine du projet
+cd "$(git rev-parse --show-toplevel)"
+
+# Assurer que main est à jour
+git checkout main
+git pull origin main
+
+# Créer une branche spécifique au backup
 BRANCH="backup-$DATE_TAG"
+git checkout -b "$BRANCH"
 
-git checkout --orphan "$BRANCH"
-git add "$DATE_TAG"
+# Ajouter uniquement le dossier du backup
+git add "$BACKUP_DIR"
 git commit -m "Backup du $DATE_TAG après mise à jour WordPress"
+
+# Pousser la branche sur GitHub
 git push origin "$BRANCH"
 
 echo "[*] ✅ Backup poussé sur branche : $BRANCH"
-echo "[*] Attente d'une Pull Request depuis GitHub."
+echo "[*] Vous pouvez maintenant créer une Pull Request depuis GitHub."
