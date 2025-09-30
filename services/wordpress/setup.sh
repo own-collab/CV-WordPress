@@ -55,7 +55,7 @@ fi
 chown -R www-data:www-data "$WP_PATH"
 
 ####################################################################
-# 
+# RECUPERATION DE LA CLE SSH LOCALE POUR GIT & SAUVEGARDE DANS UN TMP
 ####################################################################
 
 # Copier la clé vers un fichier temporaire uniquement si elle n'existe pas déjà
