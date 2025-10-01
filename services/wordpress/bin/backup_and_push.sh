@@ -19,26 +19,32 @@ BACKUP_DIR="$GIT_DIR/services/wordpress/$BACKUP_BASE/backup-$DATE_TAG"
 # ========================
 # Initialisation / mise à jour du repo
 # ========================
+cd /var/www/html
+mkdir -p "$GIT_DIR"
+
 if [ ! -d "$GIT_DIR/.git" ]; then
-    # mkdir -p "$GIT_DIR"
-    # cd "$GIT_DIR"
-    rm -rf "$GIT_DIR"/*
     echo "👾👾 Clonage du dépôt distant..."
     git clone "$GIT_REPO" "$GIT_DIR"
 else
     echo "🔄🗂️ Dépôt existant, mise à jour..."
     cd "$GIT_DIR"
 
-     # Configurer le pull pour faire un merge classique
     git config pull.rebase false
+
+    # Nettoyer le repo sauf le dossier backup (bind mount)
+    # shopt -s extglob
+    # rm -rf !(services)
+    # Nettoyer tout sauf le dossier services (où se trouve le backup)
+    # Compatible sh
+    find . -mindepth 1 -maxdepth 1 ! -name "services" -exec rm -rf {} +
 
     git fetch origin
     git checkout main
     git pull origin main
 fi
 
-echo "✅🗂️ Repo à jour, prêt pour la sauvegarde..."
 cd "$GIT_DIR"
+echo "✅🗂️ Repo à jour, prêt pour la sauvegarde..."
 
 # ========================
 # Création sauvegarde
