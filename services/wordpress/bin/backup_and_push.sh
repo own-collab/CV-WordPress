@@ -22,7 +22,7 @@ BACKUP_DIR="$GIT_DIR/services/wordpress/$BACKUP_BASE/backup-$DATE_TAG"
 if [ ! -d "$GIT_DIR/.git" ]; then
     # mkdir -p "$GIT_DIR"
     # cd "$GIT_DIR"
-    # rm -rf./*
+    rm -rf "$GIT_DIR"/*
     echo "👾👾 Clonage du dépôt distant..."
     git clone "$GIT_REPO" "$GIT_DIR"
 else
