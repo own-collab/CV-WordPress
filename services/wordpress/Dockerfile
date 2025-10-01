@@ -1,51 +1,60 @@
+# ========================================================
+# 🐳 IMAGE DE BASE
+# ========================================================
 FROM debian:bullseye
 
-# Installation des extensions PHP requises et de WP-CLI
+# ========================================================
+# 🛠️ INSTALLATION DES DÉPENDANCES ET OUTILS
+# ========================================================
 RUN apt-get update && \
     apt-get install -y \
-        php-cli php-fpm php-mysql mariadb-client curl unzip less rsync git && \
+        php-cli php-fpm php-mysql mariadb-client \
+        curl unzip less rsync git && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /usr/local/bin/wp && \
     mkdir -p /run/php && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# cette dernière ligne est très importante pour permettre à PHP-FPM de stocker son socket UNIX
-# si ce dossier n'existe pas il échoue au démarrage
-
-# Répertoire de travail
+# ========================================================
+# 📂 RÉPERTOIRE DE TRAVAIL
+# ========================================================
 WORKDIR /var/www/html
 
-###############
-# PUSH SCRIPT INIT & PREPA ENVIRONNEMENT WP
-###############
-# Ajout du script de configuration et du template wordpress au conteneur
+# ========================================================
+# ⚙️ CONFIGURATION WORDPRESS
+# ========================================================
+# Scripts et configuration PHP-FPM
 COPY setup.sh /usr/local/bin/
 COPY wp-config.php /tmp/wp-config.php
 COPY www.conf /etc/php/7.4/fpm/pool.d/www.conf
-# Permet à l'utilisateur www-data (base dans PHP-FPM) d'avoir l'accès
+
+# Permissions pour l'utilisateur www-data
 RUN chmod +x /usr/local/bin/setup.sh \
     && chown -R www-data:www-data /var/www/html
 
+# Création du répertoire WordPress si nécessaire
 RUN mkdir -p /var/www/html/wordpress \
     && chown -R www-data:www-data /var/www/html/wordpress
 
-###############
-# BACKUPS
-###############
-# Ajout du script pour intégrer les backup
+# ========================================================
+# 💾 BACKUPS AUTOMATIQUES
+# ========================================================
+# Script de backup
 COPY /bin/backup_and_push.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/backup_and_push.sh \
     && chown -R www-data:www-data /usr/local/bin/
-# Ajout d'un répertoire approprié à wordpress (si pas existant) et copie du hook php pour automatiser les backup à chaque MàJ
+
+# MU-plugin pour automatiser les backups
 RUN mkdir -p /var/www/html/wordpress/wp-content/mu-plugins
 COPY mu-plugins/auto-backup.php /var/www/html/wordpress/wp-content/mu-plugins/auto-backup.php
-# Gestion du repo git
-RUN mkdir -p /var/www/html/repo/services/wordpress/backup \
-    && chown -R www-data:www-data /var/www/html/repo/services/wordpress/backup
 
-
-# Ecouter sur le port 9000
+# ========================================================
+# 🌐 EXPOSITION DU PORT PHP-FPM
+# ========================================================
 EXPOSE 9000
 
-# Point de lancement du conteneur sur script
+# ========================================================
+# 🚀 POINT D’ENTRÉE
+# ========================================================
 ENTRYPOINT ["/usr/local/bin/setup.sh"]
+
