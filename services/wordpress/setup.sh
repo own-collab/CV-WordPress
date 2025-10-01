@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e  # Arrête le script immédiatement si une commande échoue
-# set -x  # Pour debuggage
+set -x  # Pour debuggage
 
 
 ####################################################################
@@ -20,9 +20,9 @@ echo "✅ Base de données initialisée : $MYSQL_DATABASE"
 ####################################################################
 
 # Copier le wp-config modèle si absent
-if [ ! -f "$WP_PATH/wp-config.php" ]; then
+if [ ! -f "$WP_PATH/wordpress/wp-config.php" ]; then
   echo "[setup] Copying wp-config.php…"
-  cp /tmp/wp-config.php "$WP_PATH/wp-config.php"
+  cp /tmp/wp-config.php "$WP_PATH/wordpress/wp-config.php"
 fi
 
 echo "✅ wp-config.php chargé dans le conteneur"
@@ -31,13 +31,13 @@ echo "✅ wp-config.php chargé dans le conteneur"
 ####################################################################
 
 # Télécharger WordPress si ce n'est pas déjà fait
-if [ ! -d "$WP_PATH/wp-admin" ]; then
+if [ ! -d "$WP_PATH/wordpress/wp-admin" ]; then
   echo "📥 Téléchargement de WordPress..."
-  wp core download --allow-root --path="$WP_PATH"
+  wp core download --allow-root --path="$WP_PATH/wordpress"
 fi
 
 # Installer WordPress si ce n'est pas déjà fait
-if ! wp core is-installed --allow-root --path="$WP_PATH"; then
+if ! wp core is-installed --allow-root --path="$WP_PATH/wordpress"; then
   echo "📦 Installation de WordPress..."
   wp core install \
     --url="http://${DOMAIN_NAME}" \
@@ -47,11 +47,10 @@ if ! wp core is-installed --allow-root --path="$WP_PATH"; then
     --admin_email="${WP_ADMIN_MAIL}" \
     --skip-email \
     --allow-root \
-    --path="$WP_PATH"
+    --path="$WP_PATH/wordpress"
 fi
 
 # 5) Ajuster les permissions du volume monté
-# echo "[setup] Fixing permissions…"
 chown -R www-data:www-data "$WP_PATH"
 
 ####################################################################

@@ -1,60 +1,67 @@
 #!/bin/bash
 set -euo pipefail
-# Exclu toute erreur de script et retourne l'erreur même de la première commande de la ligne (pas seulement la dernière)
 
 # ========================
 # Paramètres
 # ========================
-BACKUP_BASE="services/wordpress/backup"
-DATE_TAG=$(date +%Y%m%d.%H%M)
-BACKUP_DIR="$BACKUP_BASE/backup-$DATE_TAG"
-
-# Infos DB récupérées des variables d'environnement
 DB_HOST="${MYSQL_HOST}"
 DB_USER="${MYSQL_USER}"
 DB_PASS="${MYSQL_PASSWORD}"
 DB_NAME="${MYSQL_DATABASE}"
 
-# Repo GitHub
+GIT_DIR="/var/www/html/repo"
 GIT_REPO="git@github.com:own-collab/Wordpress_MariaDB_PhpMyAdmin.git"
 
+DATE_TAG=$(date +%Y%m%d.%H%M)
+BACKUP_BASE="backup"
+BACKUP_DIR="$GIT_DIR/services/wordpress/$BACKUP_BASE/backup-$DATE_TAG"
+
 # ========================
-# Préparation backup
+# Initialisation / mise à jour du repo
 # ========================
+if [ ! -d "$GIT_DIR/.git" ]; then
+    # mkdir -p "$GIT_DIR"
+    # cd "$GIT_DIR"
+    # rm -rf./*
+    echo "👾👾 Clonage du dépôt distant..."
+    git clone "$GIT_REPO" "$GIT_DIR"
+else
+    echo "🔄🗂️ Dépôt existant, mise à jour..."
+    cd "$GIT_DIR"
+
+     # Configurer le pull pour faire un merge classique
+    git config pull.rebase false
+
+    git fetch origin
+    git checkout main
+    git pull origin main
+fi
+
+echo "✅🗂️ Repo à jour, prêt pour la sauvegarde..."
+cd "$GIT_DIR"
+
+# ========================
+# Création sauvegarde
+# ========================
+echo "💾📦 Sauvegarde DB..."
 mkdir -p "$BACKUP_DIR"
+mysqldump -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_DIR/db.sql"
 
-echo "📦 Sauvegarde DB..."
-mysqldump -h"$DB_HOST" -u"$DB_USER" -p"${DB_PASS}" "$DB_NAME" > "$BACKUP_DIR/db.sql"
-
-echo "📥 Sauvegarde fichiers..."
-cp -a /var/www/html/ "$BACKUP_DIR/files/"
-
+echo "💾📄 Sauvegarde fichiers..."
+rsync -a --exclude 'backup/*' /var/www/html/wordpress/ "$BACKUP_DIR/files/"
 
 # ========================
 # Git commit & push
 # ========================
-
-# ========================
-# Git commit & push
-# ========================
-
-# Se placer à la racine du projet
-cd "$(git rev-parse --show-toplevel)"
-
-# Assurer que main est à jour
 git checkout main
 git pull origin main
 
-# Créer une branche spécifique au backup
 BRANCH="backup-$DATE_TAG"
-git checkout -b "$BRANCH"
+git checkout -B "$BRANCH"  # -B crée ou réinitialise la branche
 
-# Ajouter uniquement le dossier du backup
-git add "$BACKUP_DIR"
+git add "services/wordpress/$BACKUP_BASE/backup-$DATE_TAG"
 git commit -m "Backup du $DATE_TAG après mise à jour WordPress"
-
-# Pousser la branche sur GitHub
 git push origin "$BRANCH"
 
 echo "[*] ✅ Backup poussé sur branche : $BRANCH"
-echo "[*] Vous pouvez maintenant créer une Pull Request depuis GitHub."
+echo "[*] 💡 Vous pouvez maintenant créer une Pull Request depuis GitHub."
