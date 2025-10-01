@@ -38,7 +38,11 @@ RUN chmod +x /usr/local/bin/backup_and_push.sh \
     && chown -R www-data:www-data /usr/local/bin/
 # Ajout d'un répertoire approprié à wordpress (si pas existant) et copie du hook php pour automatiser les backup à chaque MàJ
 RUN mkdir -p /var/www/html/wordpress/wp-content/mu-plugins
-COPY mu-plugins/auto-backup.php /var/www/html/wordpress/wp-content/mu-plugins/auto-backup.php   
+COPY mu-plugins/auto-backup.php /var/www/html/wordpress/wp-content/mu-plugins/auto-backup.php
+# Gestion du repo git
+RUN mkdir -p /var/www/html/repo/services/wordpress/backup \
+    && chown -R www-data:www-data /var/www/html/repo/services/wordpress/backup
+
 
 # Ecouter sur le port 9000
 EXPOSE 9000

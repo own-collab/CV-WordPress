@@ -33,7 +33,7 @@ services:
       env_file: .env
       volumes:
       - wordpress-data:/var/www/html
-      - ./services/wordpress/backup:/repo/services/wordpress/backup
+      - ./services/wordpress/backup:/var/www/html/repo/services/wordpress/backup
       - /home/nico/.ssh/id_ed25519:/root/.ssh/id_rsa:ro
 
       expose:
