@@ -34,7 +34,6 @@ services:
       volumes:
       - wordpress-data:/var/www/html
       - ./services/wordpress/backup:/var/www/html/backup
-      - /home/nico/.ssh/id_ed25519:/root/.ssh/id_rsa:ro
 
       expose:
       - 9000

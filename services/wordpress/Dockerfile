@@ -32,7 +32,7 @@ COPY www.conf /etc/php/7.4/fpm/pool.d/www.conf
 RUN chmod +x /usr/local/bin/setup.sh \
     && chown -R www-data:www-data /var/www/html
 
-# Création du répertoire WordPress si nécessaire
+# Création du répertoire WordPress
 RUN mkdir -p /var/www/html/wordpress \
     && chown -R www-data:www-data /var/www/html/wordpress
 
@@ -40,8 +40,8 @@ RUN mkdir -p /var/www/html/wordpress \
 # 💾 BACKUPS AUTOMATIQUES
 # ========================================================
 # Script de backup
-COPY /bin/backup_and_push.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/backup_and_push.sh \
+COPY /bin/backup_inside.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/backup_inside.sh \
     && chown -R www-data:www-data /usr/local/bin/
 
 # MU-plugin pour automatiser les backups
