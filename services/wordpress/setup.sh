@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e  # Arrête le script immédiatement si une commande échoue
-set -x  # Pour debuggage
+# set -x  # Pour debuggage
 
 
 ####################################################################
@@ -50,9 +50,30 @@ if ! wp core is-installed --allow-root --path="$WP_PATH/wordpress"; then
     --path="$WP_PATH/wordpress"
 fi
 
+
 # 5) Ajuster les permissions du volume monté
 chown -R www-data:www-data "$WP_PATH"
 
+####################################################################
+# CREATION HOOK WORDPRESS DANS LE CONTENEUR (dans script car volume l'écrase sinon)
+####################################################################
+
+# Dossiers
+MU_SRC="/usr/local/share/mu-plugins"                              # emplacement source (dans l'image)
+MU_DST="$WP_PATH/wordpress/wp-content/mu-plugins"                  # emplacement cible (volume monté)
+MU_FILE="auto-backup.php"
+
+# Créer le dossier mu-plugins s'il n'existe pas
+mkdir -p "$MU_DST"
+
+# Copier le fichier si présent à la source
+if [ -f "$MU_SRC/$MU_FILE" ]; then
+  cp -f "$MU_SRC/$MU_FILE" "$MU_DST/$MU_FILE"
+  chown -R www-data:www-data "$MU_DST"
+  echo "✅ MU-plugin installé: $MU_DST/$MU_FILE"
+else
+  echo "⚠️  MU-plugin introuvable à: $MU_SRC/$MU_FILE"
+fi
 
 ####################################################################
 # LANCEMENT DU MOTEUR PHP php-fpm en vérifiant sa version

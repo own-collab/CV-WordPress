@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 # ========================================================
 # 📌 CONTEXTE & VARIABLES
@@ -22,9 +22,10 @@ if [ -d "$BACKUP_ROOT" ]; then
   echo "🗑️ Nettoyage du dossier backup..."
   rm -rf "$BACKUP_ROOT"/*  # Nettoie TOUT le contenu du dossier backup/
 else
-   echo "📥 Création répertoire racine des backups..."
+  echo "📥 Création répertoire racine des backups..."
   mkdir -p "$BACKUP_ROOT"  # Crée le dossier racine s'il n'existe pas
 fi
+chown -R www-data:www-data /var/www/html/backup
 
 # Création du dossier pour la sauvegarde actuelle
 echo "📦 Création de la sauvegarde WordPress + BDD dans $BACKUP_DIR..."

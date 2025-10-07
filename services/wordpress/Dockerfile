@@ -3,13 +3,18 @@
 # ========================================================
 FROM debian:bullseye
 
+# Configure timezone (default can be overridden at runtime with TZ env)
+ENV TZ=Europe/Paris
+
 # ========================================================
 # 🛠️ INSTALLATION DES DÉPENDANCES ET OUTILS
 # ========================================================
 RUN apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        tzdata \
         php-cli php-fpm php-mysql mariadb-client \
         curl unzip less rsync git && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /usr/local/bin/wp && \
     mkdir -p /run/php && \
@@ -40,13 +45,13 @@ RUN mkdir -p /var/www/html/wordpress \
 # 💾 BACKUPS AUTOMATIQUES
 # ========================================================
 # Script de backup
-COPY /bin/backup_inside.sh /usr/local/bin/
+COPY bin/backup_inside.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/backup_inside.sh \
-    && chown -R www-data:www-data /usr/local/bin/
+    && chown -R www-data:www-data /usr/local/bin
 
-# MU-plugin pour automatiser les backups
-RUN mkdir -p /var/www/html/wordpress/wp-content/mu-plugins
-COPY mu-plugins/auto-backup.php /var/www/html/wordpress/wp-content/mu-plugins/auto-backup.php
+# MU-plugin (staging hors du volume)
+RUN mkdir -p /usr/local/share/mu-plugins
+COPY mu-plugins/auto-backup.php /usr/local/share/mu-plugins/auto-backup.php
 
 # ========================================================
 # 🌐 EXPOSITION DU PORT PHP-FPM
