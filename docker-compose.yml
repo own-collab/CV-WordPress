@@ -1,0 +1,62 @@
+services:
+  nginx:
+    build: services/nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - wordpress-data:/var/www/html
+      - ./services/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - backend
+    depends_on:
+      - wordpress
+  mariadb:
+    build: services/mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    env_file: .env
+    # Centralisation de toutes les variables d'environnement
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      # - ./services/mariadb/custom.cnf:/etc/mysql/conf.d/custom.cnf
+      # bind custom.cnf avec celui du conteneur
+    expose:
+      - 3306
+    networks:
+      - backend
+  wordpress:
+      build: services/wordpress
+      container_name: wordpress
+      restart: unless-stopped
+      env_file: .env
+      volumes:
+      - wordpress-data:/var/www/html
+      - ./services/wordpress/backup:/var/www/html/backup
+
+      expose:
+      - 9000
+      networks:
+        - backend
+      depends_on:
+        - mariadb
+  phpmyadmin:
+    build: services/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    env_file: .env
+    depends_on:
+      - mariadb
+    networks:
+      - backend
+
+volumes:
+  mariadb-data:
+  wordpress-data:
+
+networks:
+  backend:
+
