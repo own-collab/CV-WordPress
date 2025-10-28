@@ -26,6 +26,7 @@ dev
 prod
 ├── Contient : (initialement vide, prêt à recevoir du contenu spécifique à prod)
 ├── Suivi distant : origin/prod
+```
 
 ---
 
@@ -33,3 +34,4 @@ Pour mettre à jour les dossiers environments/dev/ et environments/prod/ dans la
 ```bash
 git subtree add --prefix=environments/dev dev --squash
 git subtree add --prefix=environments/prod prod --squash
+```
