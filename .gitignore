@@ -3,3 +3,5 @@
 
 # Backup locaux
 services/wordpress/backup/
+services/wordpress/bin
+services/wordpress/mu-plugins
