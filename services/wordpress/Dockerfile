@@ -41,17 +41,6 @@ RUN chmod +x /usr/local/bin/setup.sh \
 RUN mkdir -p /var/www/html/wordpress \
     && chown -R www-data:www-data /var/www/html/wordpress
 
-# # ========================================================
-# # 💾 BACKUPS AUTOMATIQUES
-# # ========================================================
-# # Script de backup
-# COPY bin/backup_inside.sh /usr/local/bin/
-# RUN chmod +x /usr/local/bin/backup_inside.sh \
-#     && chown -R www-data:www-data /usr/local/bin
-
-# # MU-plugin (staging hors du volume)
-# RUN mkdir -p /usr/local/share/mu-plugins
-# COPY mu-plugins/auto-backup.php /usr/local/share/mu-plugins/auto-backup.php
 
 # ========================================================
 # 🌐 EXPOSITION DU PORT PHP-FPM
