@@ -1,5 +1,2 @@
 # Environment files
 .env
-
-# Backup locaux
-services/wordpress/backup/
