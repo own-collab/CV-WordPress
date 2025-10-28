@@ -1,20 +1,21 @@
 # CV WordPress - IaaS
-__________________________
 
-Fonctionnement global
----
-> Docker / GitHub / Terraform
 ---
 
+## Fonctionnement global
+> **Docker** / **GitHub** / **Terraform**
 
-Structure
 ---
-'''
+
+## Structure
+
+```bash
 main
 ├── Contient :
 │   ├── README.md
-│   └── environments/dev/ ← contenu de la branche `dev` (via subtree)
-│   └── environments/prod/ ← contenu de la branche `prod` (via subtree)
+│   └── environments/
+│       ├── dev/  ← contenu de la branche `dev` (via subtree)
+│       └── prod/ ← contenu de la branche `prod` (via subtree)
 │
 ├── Suivi distant : origin/main
 
@@ -28,9 +29,7 @@ prod
 
 ---
 
-
-
 Pour mettre à jour les dossiers environments/dev/ et environments/prod/ dans la branche 'main' :
-'''
+```bash
 git subtree add --prefix=environments/dev dev --squash
 git subtree add --prefix=environments/prod prod --squash
