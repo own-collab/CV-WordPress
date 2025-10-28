@@ -33,7 +33,7 @@ services:
       env_file: .env
       volumes:
       - wordpress-data:/var/www/html
-      - ./services/wordpress/backup:/var/www/html/backup
+      # - ./services/wordpress/backup:/var/www/html/backup
 
       expose:
       - 9000
